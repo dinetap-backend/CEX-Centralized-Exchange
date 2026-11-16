@@ -304,11 +304,268 @@
   padding: 0;
 }
 
+.nav-button,
+.link-button {
+  border: 1px solid rgba(164, 177, 255, 0.5);
+  background: rgba(124, 140, 255, 0.08);
+  color: #edf3ff;
+  border-radius: 999px;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  font-weight: 700;
+}
+
 .admin-box {
   display: flex;
   flex-direction: column;
   gap: 8px;
   color: #ebf1ff;
+}
+
+.wallet-box {
+  gap: 18px;
+}
+
+.wallet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.wallet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 14px;
+}
+
+.wallet-card {
+  background: rgba(127, 144, 255, 0.12);
+  border: 1px solid rgba(160, 180, 255, 0.2);
+  border-radius: 18px;
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.wallet-card span,
+.wallet-card small {
+  color: #aabce6;
+}
+
+.wallet-card strong {
+  color: #f4f7ff;
+  font-size: 1.8rem;
+}
+
+.empty-wallet-card {
+  min-height: 120px;
+  justify-content: center;
+}
+
+.wallet-form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+.wallet-form-row label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #ebf1ff;
+  font-weight: 600;
+}
+
+.wallet-form-row input {
+  border: 1px solid rgba(158, 179, 255, 0.3);
+  background: rgba(12, 18, 32, 0.45);
+  color: #f4f8ff;
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  font: inherit;
+}
+
+.wallet-form-row input:focus {
+  outline: 2px solid rgba(124, 140, 255, 0.25);
+  border-color: #8ea5ff;
+}
+
+.wallet-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.wallet-page-shell {
+  padding-bottom: 80px;
+}
+
+.wallet-page {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  margin-top: 16px;
+}
+
+.wallet-header-panel {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 20px;
+}
+
+.wallet-header-panel h1 {
+  margin: 0;
+  color: #f5f7ff;
+  font-size: clamp(2.2rem, 4vw, 3.2rem);
+}
+
+.wallet-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 18px;
+}
+
+.wallet-summary-card {
+  background: rgba(137, 157, 255, 0.08);
+  border: 1px solid rgba(157, 176, 255, 0.2);
+  border-radius: 22px;
+  padding: 22px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.wallet-summary-card span,
+.wallet-summary-card small {
+  color: #b2c3ef;
+}
+
+.wallet-summary-card strong {
+  color: #f5f7ff;
+  font-size: 2rem;
+}
+
+.wallet-operations-panel,
+.wallet-table-panel {
+  background: rgba(137, 157, 255, 0.06);
+  border: 1px solid rgba(157, 176, 255, 0.2);
+  border-radius: 22px;
+  padding: 24px;
+}
+
+.compact-heading {
+  margin-bottom: 16px;
+}
+
+.wallet-table-wrap {
+  overflow-x: auto;
+}
+
+.wallet-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 640px;
+}
+
+.wallet-table th,
+.wallet-table td {
+  text-align: left;
+  padding: 14px 12px;
+  border-bottom: 1px solid rgba(162, 180, 255, 0.18);
+  color: #dfe9ff;
+}
+
+.wallet-table th {
+  color: #9bb0ff;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.success-text {
+  color: #82f0b5;
+}
+
+.warning-text {
+  color: #ffca7a;
+}
+
+.muted-text {
+  color: #bac7e8;
+}
+
+.auth-page-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 32px 20px;
+}
+
+.auth-card {
+  width: min(440px, 100%);
+  background: rgba(11, 16, 32, 0.82);
+  border: 1px solid rgba(162, 178, 255, 0.22);
+  border-radius: 24px;
+  padding: 28px;
+  box-shadow: 0 30px 80px rgba(7, 12, 24, 0.5);
+}
+
+.auth-brand-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.auth-header {
+  margin-bottom: 20px;
+}
+
+.auth-header h1 {
+  margin: 0;
+  color: #f4f7ff;
+  font-size: clamp(2rem, 4vw, 2.8rem);
+}
+
+.auth-subtitle {
+  margin: 10px 0 0;
+  color: #bac7e8;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.auth-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #ebf1ff;
+  font-weight: 600;
+}
+
+.auth-form input {
+  border: 1px solid rgba(158, 179, 255, 0.3);
+  background: rgba(17, 26, 45, 0.9);
+  color: #f4f8ff;
+  border-radius: 12px;
+  padding: 0.95rem 1rem;
+  font: inherit;
+}
+
+.auth-form input:focus {
+  outline: 2px solid rgba(124, 140, 255, 0.25);
+  border-color: #8ea5ff;
+}
+
+.auth-submit {
+  width: 100%;
+  justify-content: center;
 }
 
 @media (max-width: 900px) {

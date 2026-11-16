@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes';
+import walletRoutes from './routes/walletRoutes';
 
 dotenv.config();
 
@@ -16,6 +17,7 @@ app.get('/api/health', (_req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/api/wallet', walletRoutes);
 
 app.post('/api/contact', (req, res) => {
   const { name, email, message } = req.body as {

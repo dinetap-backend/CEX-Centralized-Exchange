@@ -2,6 +2,15 @@ import { useEffect, useState } from 'react'
 import type { ChangeEvent, FormEvent } from 'react'
 import './App.css'
 import { getCurrentUser, loginUser, registerUser, type AuthUser } from './services/authService'
+import {
+  createWallet,
+  depositWallet,
+  getWalletDetail,
+  getWallets,
+  type Wallet,
+  type WalletDetail,
+  withdrawWallet,
+} from './services/walletService'
 
 const skills = [
   'React',
@@ -35,15 +44,23 @@ const projects = [
 function App() {
   const [formData, setFormData] = useState({ name: '', email: '', message: '' })
   const [status, setStatus] = useState('')
+  const [view, setView] = useState<'home' | 'auth' | 'wallet'>('home')
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
   const [authForm, setAuthForm] = useState({ name: '', email: '', password: '' })
   const [authError, setAuthError] = useState('')
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null)
+  const [wallets, setWallets] = useState<Wallet[]>([])
+  const [walletDetails, setWalletDetails] = useState<WalletDetail[]>([])
+  const [walletForm, setWalletForm] = useState({ currency: 'USDT', amount: '100' })
+  const [walletError, setWalletError] = useState('')
+  const [walletStatus, setWalletStatus] = useState('')
 
   useEffect(() => {
     const token = localStorage.getItem('portfolio-token')
 
     if (!token) {
+      setCurrentUser(null)
+      setWallets([])
       return
     }
 
@@ -55,6 +72,46 @@ function App() {
       })
   }, [])
 
+  useEffect(() => {
+    if (!currentUser) {
+      setWallets([])
+      setWalletDetails([])
+      return
+    }
+
+    const token = localStorage.getItem('portfolio-token')
+
+    if (!token) {
+      return
+    }
+
+    getWallets(token)
+      .then(async (walletList) => {
+        setWallets(walletList)
+
+        if (walletList.length === 0) {
+          setWalletDetails([])
+          return
+        }
+
+        const details = await Promise.all(
+          walletList.map(async (wallet) => {
+            try {
+              return await getWalletDetail(token, wallet.currency)
+            } catch {
+              return null
+            }
+          }),
+        )
+
+        setWalletDetails(details.filter((wallet): wallet is WalletDetail => wallet !== null))
+      })
+      .catch(() => {
+        setWallets([])
+        setWalletDetails([])
+      })
+  }, [currentUser, view])
+
   const handleChange = (
     event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
@@ -65,6 +122,63 @@ function App() {
   const handleAuthFieldChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target
     setAuthForm((previous) => ({ ...previous, [name]: value }))
+  }
+
+  const handleWalletFieldChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target
+    setWalletForm((previous) => ({ ...previous, [name]: value }))
+  }
+
+  const handleWalletAction = async (action: 'create' | 'deposit' | 'withdraw') => {
+    if (!currentUser) {
+      return
+    }
+
+    const token = localStorage.getItem('portfolio-token')
+
+    if (!token) {
+      setWalletError('Authentication required.')
+      return
+    }
+
+    try {
+      setWalletError('')
+      setWalletStatus('Processing wallet request...')
+
+      const currency = walletForm.currency.trim() || 'USDT'
+      const amount = Number(walletForm.amount)
+
+      if (action === 'create') {
+        const wallet = await createWallet(token, currency)
+        setWallets((previous) => {
+          const existing = previous.find((item) => item.currency === wallet.currency)
+          if (existing) {
+            return previous.map((item) => (item.currency === wallet.currency ? wallet : item))
+          }
+          return [...previous, wallet]
+        })
+        setWalletStatus(`${wallet.currency} wallet created.`)
+        return
+      }
+
+      if (action === 'deposit') {
+        const wallet = await depositWallet(token, currency, amount)
+        setWallets((previous) =>
+          previous.map((item) => (item.currency === wallet.currency ? wallet : item)),
+        )
+        setWalletStatus(`${wallet.currency} deposit successful.`)
+        return
+      }
+
+      const wallet = await withdrawWallet(token, currency, amount)
+      setWallets((previous) =>
+        previous.map((item) => (item.currency === wallet.currency ? wallet : item)),
+      )
+      setWalletStatus(`${wallet.currency} withdrawal successful.`)
+    } catch (error) {
+      setWalletError(error instanceof Error ? error.message : 'Wallet request failed.')
+      setWalletStatus('')
+    }
   }
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -111,6 +225,7 @@ function App() {
       localStorage.setItem('portfolio-token', response.token)
       setCurrentUser(response.user)
       setAuthForm({ name: '', email: '', password: '' })
+      setView('home')
     } catch (error) {
       setAuthError(error instanceof Error ? error.message : 'Authentication failed.')
     }
@@ -119,6 +234,239 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem('portfolio-token')
     setCurrentUser(null)
+    setWallets([])
+    setWalletDetails([])
+    setWalletError('')
+    setWalletStatus('')
+  }
+
+  if (view === 'wallet') {
+    return (
+      <div className="portfolio-shell wallet-page-shell">
+        <header className="topbar wallet-topbar">
+          <div className="brand">CEX Exchange</div>
+          <nav>
+            <button type="button" className="nav-button" onClick={() => setView('home')}>
+              Home
+            </button>
+            <button type="button" className="nav-button" onClick={() => setView('auth')}>
+              {currentUser ? 'Dashboard' : 'Login'}
+            </button>
+          </nav>
+        </header>
+
+        <main className="wallet-page">
+          <section className="wallet-header-panel">
+            <div>
+              <p className="eyebrow">Portfolio</p>
+              <h1>Wallet overview</h1>
+            </div>
+            {currentUser ? (
+              <button type="button" className="primary-btn" onClick={handleLogout}>Logout</button>
+            ) : null}
+          </section>
+
+          {!currentUser ? (
+            <div className="admin-box">
+              <p>Please sign in to view your wallet and transaction history.</p>
+              <button type="button" className="primary-btn" onClick={() => setView('auth')}>
+                Open authentication page
+              </button>
+            </div>
+          ) : (
+            <>
+              <section className="wallet-summary-grid">
+                {walletDetails.length > 0 ? (
+                  walletDetails.map(({ wallet }) => (
+                    <article key={wallet.id} className="wallet-summary-card">
+                      <span>{wallet.currency}</span>
+                      <strong>{wallet.balance.toFixed(2)}</strong>
+                      <small>Last updated {new Date(wallet.updatedAt).toLocaleString()}</small>
+                    </article>
+                  ))
+                ) : (
+                  <article className="wallet-summary-card empty-wallet-card">
+                    <span>No wallet data</span>
+                    <strong>Create a wallet</strong>
+                  </article>
+                )}
+              </section>
+
+              <section className="wallet-operations-panel">
+                <div className="wallet-form-row">
+                  <label>
+                    Currency
+                    <input
+                      type="text"
+                      name="currency"
+                      value={walletForm.currency}
+                      onChange={handleWalletFieldChange}
+                      placeholder="USDT"
+                    />
+                  </label>
+
+                  <label>
+                    Amount
+                    <input
+                      type="number"
+                      name="amount"
+                      min="0"
+                      step="0.01"
+                      value={walletForm.amount}
+                      onChange={handleWalletFieldChange}
+                      placeholder="100"
+                    />
+                  </label>
+                </div>
+
+                <div className="wallet-actions">
+                  <button type="button" className="primary-btn" onClick={() => void handleWalletAction('create')}>
+                    Create Wallet
+                  </button>
+                  <button type="button" className="ghost-btn" onClick={() => void handleWalletAction('deposit')}>
+                    Deposit
+                  </button>
+                  <button type="button" className="ghost-btn" onClick={() => void handleWalletAction('withdraw')}>
+                    Withdraw
+                  </button>
+                </div>
+
+                {walletStatus ? <p className="status-text">{walletStatus}</p> : null}
+                {walletError ? <p className="error-text">{walletError}</p> : null}
+              </section>
+
+              <section className="wallet-table-panel">
+                <div className="section-heading compact-heading">
+                  <p className="eyebrow">Transactions</p>
+                  <h2>Activity history</h2>
+                </div>
+
+                {walletDetails.length === 0 ? (
+                  <p className="muted-text">No transactions available yet.</p>
+                ) : (
+                  <div className="wallet-table-wrap">
+                    <table className="wallet-table">
+                      <thead>
+                        <tr>
+                          <th>Currency</th>
+                          <th>Type</th>
+                          <th>Amount</th>
+                          <th>Balance after</th>
+                          <th>Date</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {walletDetails
+                          .flatMap(({ wallet, transactions }) =>
+                            transactions.map((transaction) => ({
+                              ...transaction,
+                              walletCurrency: wallet.currency,
+                            })),
+                          )
+                          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                          .map((transaction) => (
+                            <tr key={transaction.id}>
+                              <td>{transaction.walletCurrency}</td>
+                              <td className={transaction.type === 'deposit' ? 'success-text' : 'warning-text'}>
+                                {transaction.type}
+                              </td>
+                              <td>{transaction.amount.toFixed(2)}</td>
+                              <td>{transaction.balanceAfter.toFixed(2)}</td>
+                              <td>{new Date(transaction.createdAt).toLocaleString()}</td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </section>
+            </>
+          )}
+        </main>
+      </div>
+    )
+  }
+
+  if (view === 'auth') {
+    return (
+      <div className="auth-page-shell">
+        <div className="auth-card">
+          <div className="auth-brand-row">
+            <div className="brand">CEX Exchange</div>
+            <button type="button" className="link-button" onClick={() => setView('home')}>
+              Back home
+            </button>
+          </div>
+
+          <div className="auth-header">
+            <p className="eyebrow">Secure access</p>
+            <h1>{authMode === 'login' ? 'Welcome back' : 'Create account'}</h1>
+            <p className="auth-subtitle">
+              {authMode === 'login'
+                ? 'Sign in to manage your exchange workspace.'
+                : 'Register to access your trading and account tools.'}
+            </p>
+          </div>
+
+          <form className="auth-form" onSubmit={handleAuthSubmit}>
+            {authMode === 'register' ? (
+              <label>
+                Full name
+                <input
+                  type="text"
+                  name="name"
+                  value={authForm.name}
+                  onChange={handleAuthFieldChange}
+                  placeholder="Enter your full name"
+                  required
+                />
+              </label>
+            ) : null}
+
+            <label>
+              Email
+              <input
+                type="email"
+                name="email"
+                value={authForm.email}
+                onChange={handleAuthFieldChange}
+                placeholder="name@exchange.com"
+                required
+              />
+            </label>
+
+            <label>
+              Password
+              <input
+                type="password"
+                name="password"
+                value={authForm.password}
+                onChange={handleAuthFieldChange}
+                placeholder="Enter your password"
+                required
+              />
+            </label>
+
+            {authError ? <p className="error-text">{authError}</p> : null}
+
+            <button type="submit" className="primary-btn auth-submit">
+              {authMode === 'login' ? 'Login' : 'Register'}
+            </button>
+
+            <button
+              type="button"
+              className="toggle-link"
+              onClick={() => {
+                setAuthMode((previous) => (previous === 'login' ? 'register' : 'login'))
+                setAuthError('')
+              }}
+            >
+              {authMode === 'login' ? 'Need an account? Register' : 'Already have an account? Login'}
+            </button>
+          </form>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -130,7 +478,12 @@ function App() {
           <a href="#projects">Products</a>
           <a href="#skills">Platform</a>
           <a href="#contact">Contact</a>
-          <a href="#admin">Admin</a>
+          <button type="button" className="nav-button" onClick={() => setView('auth')}>
+            {currentUser ? 'Dashboard' : 'Login'}
+          </button>
+          <button type="button" className="nav-button" onClick={() => setView('wallet')}>
+            Wallets
+          </button>
         </nav>
       </header>
 
@@ -144,7 +497,9 @@ function App() {
             </p>
             <div className="cta-row">
               <a className="primary-btn" href="#projects">Explore Features</a>
-              <a className="ghost-btn" href="#contact">Request Demo</a>
+              <button type="button" className="ghost-btn" onClick={() => setView('auth')}>
+                {currentUser ? 'Open dashboard' : 'Request Demo'}
+              </button>
             </div>
           </div>
 
@@ -266,65 +621,83 @@ function App() {
           </div>
 
           {currentUser ? (
-            <div className="admin-box">
-              <p>Signed in as <strong>{currentUser.name}</strong></p>
-              <p>{currentUser.email}</p>
-              <button type="button" className="primary-btn" onClick={handleLogout}>Logout</button>
-            </div>
-          ) : (
-            <form className="admin-form" onSubmit={handleAuthSubmit}>
-              {authMode === 'register' ? (
+            <div className="admin-box wallet-box">
+              <div className="wallet-header">
+                <div>
+                  <p>Signed in as <strong>{currentUser.name}</strong></p>
+                  <p>{currentUser.email}</p>
+                </div>
+                <button type="button" className="primary-btn" onClick={handleLogout}>Logout</button>
+              </div>
+
+              <div className="wallet-grid">
+                {wallets.length > 0 ? (
+                  wallets.map((wallet) => (
+                    <div key={wallet.id} className="wallet-card">
+                      <span>{wallet.currency}</span>
+                      <strong>{wallet.balance.toFixed(2)}</strong>
+                      <small>Updated {new Date(wallet.updatedAt).toLocaleString()}</small>
+                    </div>
+                  ))
+                ) : (
+                  <div className="wallet-card empty-wallet-card">
+                    <span>No wallets yet</span>
+                    <strong>Start with a new balance</strong>
+                  </div>
+                )}
+              </div>
+
+              <div className="wallet-form-row">
                 <label>
-                  Name
+                  Currency
                   <input
                     type="text"
-                    name="name"
-                    value={authForm.name}
-                    onChange={handleAuthFieldChange}
-                    placeholder="Your full name"
-                    required
+                    name="currency"
+                    value={walletForm.currency}
+                    onChange={handleWalletFieldChange}
+                    placeholder="USDT"
                   />
                 </label>
-              ) : null}
 
-              <label>
-                Email
-                <input
-                  type="email"
-                  name="email"
-                  value={authForm.email}
-                  onChange={handleAuthFieldChange}
-                  placeholder="admin@example.com"
-                  required
-                />
-              </label>
+                <label>
+                  Amount
+                  <input
+                    type="number"
+                    name="amount"
+                    min="0"
+                    step="0.01"
+                    value={walletForm.amount}
+                    onChange={handleWalletFieldChange}
+                    placeholder="100"
+                  />
+                </label>
+              </div>
 
-              <label>
-                Password
-                <input
-                  type="password"
-                  name="password"
-                  value={authForm.password}
-                  onChange={handleAuthFieldChange}
-                  placeholder="Password"
-                  required
-                />
-              </label>
+              <div className="wallet-actions">
+                <button type="button" className="primary-btn" onClick={() => void handleWalletAction('create')}>
+                  Create Wallet
+                </button>
+                <button type="button" className="ghost-btn" onClick={() => void handleWalletAction('deposit')}>
+                  Deposit
+                </button>
+                <button type="button" className="ghost-btn" onClick={() => void handleWalletAction('withdraw')}>
+                  Withdraw
+                </button>
+              </div>
 
-              {authError ? <p className="error-text">{authError}</p> : null}
-
-              <button type="submit" className="primary-btn submit-btn">
-                {authMode === 'login' ? 'Login' : 'Register'}
+              {walletStatus ? <p className="status-text">{walletStatus}</p> : null}
+              {walletError ? <p className="error-text">{walletError}</p> : null}
+            </div>
+          ) : (
+            <div className="admin-box">
+              <p>Access the exchange admin panel to manage your account.</p>
+              <button type="button" className="primary-btn" onClick={() => setView('auth')}>
+                Open authentication page
               </button>
-
-              <button
-                type="button"
-                className="toggle-link"
-                onClick={() => setAuthMode((previous) => (previous === 'login' ? 'register' : 'login'))}
-              >
-                {authMode === 'login' ? 'Need an account? Register' : 'Already have an account? Login'}
+              <button type="button" className="ghost-btn" onClick={() => setView('wallet')}>
+                Wallet page
               </button>
-            </form>
+            </div>
           )}
         </section>
       </main>
