@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("MONGODB_URI")
+}
+
+model User {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  email        String   @unique
+  passwordHash String
+  wallets      Wallet[]
+  trades       Trade[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Wallet {
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String        @db.ObjectId
+  user         User          @relation(fields: [userId], references: [id])
+  currency     String
+  balance      Float         @default(0)
+  transactions Transaction[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@unique([userId, currency])
+}
+
+model Transaction {
+  id           String          @id @default(auto()) @map("_id") @db.ObjectId
+  walletId     String          @db.ObjectId
+  wallet       Wallet          @relation(fields: [walletId], references: [id])
+  userId       String          @db.ObjectId
+  currency     String
+  type         TransactionType
+  amount       Float
+  balanceAfter Float
+  createdAt    DateTime        @default(now())
+}
+
+model Trade {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String    @db.ObjectId
+  user      User      @relation(fields: [userId], references: [id])
+  symbol    String
+  side      TradeSide
+  quantity  Float
+  price     Float
+  notional  Float
+  fee       Float
+  status    String    @default("filled")
+  createdAt DateTime  @default(now())
+
+  @@index([userId, createdAt])
+}
+
+enum TransactionType {
+  deposit
+  withdrawal
+}
+
+enum TradeSide {
+  buy
+  sell
+}

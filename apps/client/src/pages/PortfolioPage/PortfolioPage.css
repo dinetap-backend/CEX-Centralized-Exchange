@@ -1,0 +1,386 @@
+:root {
+  --portfolio-panel: #141d2c;
+  --portfolio-panel-soft: #111827;
+  --portfolio-border: rgba(125, 149, 187, 0.13);
+}
+
+.portfolio-page {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0 32px 48px;
+  background: #0d1523;
+  color: #e9eef7;
+}
+
+.portfolio-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  min-height: 52px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--portfolio-border);
+}
+
+.toolbar-link,
+.period-control,
+.detail-controls button,
+.position-controls button {
+  border: 1px solid var(--portfolio-border);
+  background: #18243a;
+  color: #96a5bb;
+}
+
+.toolbar-link {
+  min-height: 36px;
+  padding: 0 13px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+}
+
+.toolbar-primary {
+  color: #79d9ff;
+  border-color: rgba(86, 174, 220, 0.24);
+}
+
+.account-overview {
+  display: grid;
+  grid-template-columns: 0.75fr 1.65fr 0.72fr;
+  gap: 12px;
+  padding: 24px 0;
+}
+
+.overview-card {
+  min-width: 0;
+  min-height: 300px;
+  border: 1px solid var(--portfolio-border);
+  border-radius: 3px;
+  background: var(--portfolio-panel);
+}
+
+.volume-card {
+  padding: 22px;
+}
+
+.period-control {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 5px;
+  font-size: 0.78rem;
+}
+
+.volume-card > strong {
+  display: block;
+  margin: 22px 0 12px;
+  font-size: 2.15rem;
+  letter-spacing: -0.04em;
+}
+
+.text-button {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #6ea8ff;
+  font-size: 0.78rem;
+}
+
+.text-button.compact {
+  position: absolute;
+  right: 18px;
+}
+
+.fee-summary {
+  position: relative;
+  display: grid;
+  gap: 12px;
+  margin-top: 36px;
+  padding-top: 20px;
+  border-top: 1px solid var(--portfolio-border);
+}
+
+.fee-summary > span {
+  color: #96a5bb;
+  font-size: 0.78rem;
+}
+
+.fee-summary > strong {
+  font-size: 1.55rem;
+}
+
+.card-controls {
+  display: flex;
+  align-items: center;
+  height: 62px;
+  padding: 12px;
+  border-bottom: 1px solid var(--portfolio-border);
+}
+
+.control-spacer {
+  flex: 1;
+}
+
+.account-grid {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 238px;
+}
+
+.account-row,
+.metric-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 38px;
+  border-bottom: 1px solid rgba(125, 149, 187, 0.08);
+}
+
+.account-row {
+  padding: 0 16px;
+  color: #96a5bb;
+  font-size: 0.78rem;
+}
+
+.account-row strong {
+  color: #edf2f8;
+}
+
+.performance-chart {
+  position: relative;
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  grid-template-rows: 30px 1fr;
+  padding: 14px 14px 18px 8px;
+  border-left: 1px solid var(--portfolio-border);
+}
+
+.chart-value {
+  grid-column: 2;
+  color: #96a5bb;
+  font-size: 0.75rem;
+}
+
+.chart-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0 8px 0 0;
+  color: #96a5bb;
+  font-size: 0.72rem;
+}
+
+.chart-grid {
+  background-image:
+    linear-gradient(rgba(125, 149, 187, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(125, 149, 187, 0.07) 1px, transparent 1px);
+  background-size: 100% 25%, 12.5% 100%;
+  border-bottom: 1px solid rgba(125, 149, 187, 0.18);
+}
+
+.chart-grid span {
+  display: block;
+  height: 100%;
+  border-left: 1px solid rgba(125, 149, 187, 0.18);
+}
+
+.pnl-card {
+  position: relative;
+  padding: 16px 16px 54px;
+}
+
+.metric-row {
+  color: #96a5bb;
+  font-size: 0.78rem;
+}
+
+.metric-row strong {
+  color: #edf2f8;
+}
+
+.pnl-period {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+}
+
+.portfolio-details {
+  border: 1px solid var(--portfolio-border);
+  background: var(--portfolio-panel);
+}
+
+.tab-bar {
+  display: flex;
+  align-items: flex-end;
+  overflow-x: auto;
+  min-height: 54px;
+  border-bottom: 1px solid var(--portfolio-border);
+}
+
+.detail-tab {
+  flex: 0 0 auto;
+  height: 54px;
+  padding: 0 14px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: #96a5bb;
+  font-size: 0.78rem;
+}
+
+.detail-tab.active {
+  color: #dfeaff;
+  border-bottom-color: #66a8ff;
+}
+
+.detail-controls {
+  display: flex;
+  justify-content: flex-end;
+  min-height: 50px;
+  padding: 8px;
+  border-bottom: 1px solid var(--portfolio-border);
+}
+
+.position-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.detail-controls button {
+  min-height: 34px;
+  min-width: 86px;
+  border-radius: 4px;
+}
+
+.positions-header {
+  display: grid;
+  grid-template-columns: 1.1fr repeat(8, 0.9fr);
+  min-height: 44px;
+  align-items: center;
+  padding: 0 12px;
+  color: #96a5bb;
+  border-bottom: 1px solid var(--portfolio-border);
+  font-size: 0.72rem;
+}
+
+.empty-state {
+  display: grid;
+  place-items: center;
+  min-height: 180px;
+  align-content: center;
+  gap: 7px;
+  color: #96a5bb;
+  text-align: center;
+}
+
+.empty-state strong {
+  color: #dfe6f1;
+  font-size: 0.88rem;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 0.78rem;
+}
+
+.empty-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--portfolio-border);
+  border-radius: 50%;
+}
+
+.live-list {
+  min-height: 224px;
+}
+
+.live-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: center;
+  min-height: 56px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--portfolio-border);
+  color: #b3bfd0;
+}
+
+.live-row strong {
+  color: #edf2f8;
+}
+
+.live-row small {
+  text-align: right;
+  color: #7f8da3;
+}
+
+.trade-row {
+  grid-template-columns: 1.1fr 0.7fr 0.9fr 0.9fr 0.9fr 1.4fr;
+}
+
+.trade-row .buy {
+  color: #46d39a;
+}
+
+.trade-row .sell {
+  color: #ff7d7d;
+}
+
+.compact-empty {
+  min-height: 224px;
+}
+
+@media (max-width: 1100px) {
+  .account-overview {
+    grid-template-columns: 1fr 2fr;
+  }
+
+  .pnl-card {
+    grid-column: 1 / -1;
+    min-height: 160px;
+  }
+}
+
+@media (max-width: 760px) {
+  .portfolio-page {
+    padding: 0 12px 32px;
+  }
+
+  .portfolio-toolbar {
+    overflow-x: auto;
+    justify-content: flex-start;
+  }
+
+  .toolbar-link {
+    flex: 0 0 auto;
+  }
+
+  .account-overview {
+    grid-template-columns: 1fr;
+  }
+
+  .pnl-card {
+    grid-column: auto;
+  }
+
+  .account-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .performance-chart {
+    min-height: 220px;
+    border-left: 0;
+    border-top: 1px solid var(--portfolio-border);
+  }
+
+  .positions-header {
+    grid-template-columns: repeat(9, minmax(120px, 1fr));
+    overflow-x: auto;
+  }
+
+  .positions-table {
+    overflow-x: auto;
+  }
+}

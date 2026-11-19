@@ -1,0 +1,17 @@
+{
+  "name": "cex-exchange",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:client": "npm run dev --workspace ./apps/client",
+    "dev:server": "npm run dev --workspace ./apps/server",
+    "build:client": "npm run build --workspace ./apps/client",
+    "build:server": "npm run build --workspace ./apps/server",
+    "test:server": "npm run test --workspace ./apps/server",
+    "db:generate": "npm run db:generate --workspace ./apps/server",
+    "build": "npm run build:server && npm run build:client",
+    "test": "npm run test:server"
+  }
+}
